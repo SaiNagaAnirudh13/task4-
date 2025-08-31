@@ -20,11 +20,11 @@ jobs:
           node-version: "20"
 
       - name: Install frontend dependencies
-        working-directory: ./frontend
+        working-directory: ./task4/frontend
         run: npm install
 
       - name: Build React frontend
-        working-directory: ./frontend
+        working-directory: ./task4/frontend
         run: npm run build
 
       # Deploy files to Azure VM
@@ -41,11 +41,11 @@ jobs:
           # Deploy Node.js backend files
           # The rsync command only copies changed files, making deployments faster.
           echo "Deploying backend files to VM..."
-          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./backend/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:~/retail-backend/
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./task4/backend/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:~/retail-backend/
 
           # Deploy React frontend build files
           echo "Deploying frontend build files to VM..."
-          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./frontend/dist/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:/var/www/html/retail-app/dist/
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./task4/frontend/dist/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:/var/www/html/retail-app/dist/
 
       # Restart the backend application on the VM
       - name: Restart PM2 process
