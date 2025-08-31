@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -17,36 +17,36 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Install frontend dependencies
-        working-directory: ./task4/frontend
+        working-directory: ./retail-frontend
         run: npm install
 
       - name: Build React frontend
-        working-directory: ./task4/frontend
+        working-directory: ./retail-frontend
         run: npm run build
-
+        
       # Deploy files to Azure VM
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
+          
       - name: Deploy backend and frontend
         run: |
           # The -o StrictHostKeyChecking=no bypasses the host key check
           # for automation, which is standard practice in CI/CD.
-
+          
           # Deploy Node.js backend files
           # The rsync command only copies changed files, making deployments faster.
           echo "Deploying backend files to VM..."
-          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./task4/backend/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:~/retail-backend/
-
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./retail-backend/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:~/retail-backend/
+          
           # Deploy React frontend build files
           echo "Deploying frontend build files to VM..."
-          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./task4/frontend/dist/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:/var/www/html/retail-app/dist/
-
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./retail-frontend/dist/ ${{ secrets.VM_USERNAME }}@${{ secrets.VM_IP }}:/var/www/html/retail-app/dist/
+          
       # Restart the backend application on the VM
       - name: Restart PM2 process
         uses: appleboy/ssh-action@v0.1.10
@@ -59,10 +59,11 @@ jobs:
             cd ~/retail-backend
             npm install
             pm2 restart retail-backend
-
+            
       - name: Generate deployment log
         run: |
           echo "Deployment successful."
           echo "Frontend deployed to /var/www/html/retail-app/dist/"
           echo "Backend deployed to ~/retail-backend/"
           echo "PM2 process 'retail-backend' restarted." > deploy.log
+ 
